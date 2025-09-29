@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster as SonnerToaster } from "@/components/ui/sonner";
+import NextAuthSessionProvider from "@/provider/SessionProvider";
+import QueryProvider from "@/provider/QueryProvider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,11 +28,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="id" className="scroll-smooth" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <TooltipProvider>
+            <SonnerToaster />
+            <QueryProvider>
+              <NextAuthSessionProvider>
+                <div className="" vaul-drawer-wrapper="">
+                  {children}
+                </div>
+              </NextAuthSessionProvider>
+            </QueryProvider>
+          </TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
