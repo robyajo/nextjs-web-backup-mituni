@@ -74,7 +74,7 @@ const Navigation = () => {
 
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center gap-4">
-            <Button variant="outline" size="sm">
+            <Button variant="neutral" size="sm">
               <Link href="/login">Login</Link>
             </Button>
             <Button variant="default" size="sm">
