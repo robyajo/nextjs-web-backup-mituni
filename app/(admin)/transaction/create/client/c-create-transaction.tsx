@@ -18,7 +18,17 @@ import {
   FileText,
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import dynamic from "next/dynamic";
 
+const SelectComboboxFilter = dynamic(
+  () => import("@/components/select/select-combobox-filter"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-10 w-full rounded-md border border-input bg-background animate-pulse" />
+    ),
+  }
+);
 const LaundryCheckout = () => {
   const [activeTab, setActiveTab] = useState("produk");
   const [searchTerm, setSearchTerm] = useState("");
@@ -307,7 +317,7 @@ const LaundryCheckout = () => {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Keranjang</CardTitle>
-                  <Badge variant="destructive" className="rounded-full">
+                  <Badge variant="default" className="rounded-full">
                     {cart.length}
                   </Badge>
                 </div>
