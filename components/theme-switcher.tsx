@@ -34,7 +34,12 @@ export function ThemeSwitcher() {
 
   return (
     <>
-      <Button className="" size={"icon"} onClick={handleThemeChange}>
+      <Button
+        className=""
+        variant={"neutral"}
+        size={"icon"}
+        onClick={handleThemeChange}
+      >
         <Sun className="hidden dark:inline stroke-foreground" />
         <Moon className="inline dark:hidden stroke-foreground" />
         <span className="sr-only">Toggle theme</span>

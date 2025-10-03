@@ -1,7 +1,32 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useTheme } from "next-themes";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+interface Customer {
+  id: number;
+  name: string;
+  phone_number: string;
+  email?: string | null;
+  address?: string | null;
+  gender?: string | null;
+  branch_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface CustomerResponse {
+  success: boolean;
+  message: string;
+  data: Customer[];
+}
+
+interface SelectedCustomer {
+  id?: number;
+  name?: string;
+  phone?: string;
+  [key: string]: any;
+}
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +44,7 @@ import {
 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import dynamic from "next/dynamic";
+import { useCustomerData } from "@/hooks/useCustumer";
 
 const SelectComboboxFilter = dynamic(
   () => import("@/components/select/select-combobox-filter"),
@@ -32,7 +58,8 @@ const SelectComboboxFilter = dynamic(
 const LaundryCheckout = () => {
   const [activeTab, setActiveTab] = useState("produk");
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [selectedCustomer, setSelectedCustomer] =
+    useState<SelectedCustomer | null>(null);
   const [cart, setCart] = useState([
     {
       id: 1,
@@ -46,6 +73,36 @@ const LaundryCheckout = () => {
   const [paymentStatus, setPaymentStatus] = useState("lunas");
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const { data: customers, isLoading } = useCustomerData();
+  const customerData = customers as CustomerResponse | undefined;
+
+  // Transform customer data for the select component
+  const customerOptions = React.useMemo(() => {
+    if (!customerData?.data) return [];
+    return customerData.data.map((customer: Customer) => ({
+      label: customer.name,
+      value: customer.id.toString(),
+      phone: customer.phone_number,
+    }));
+  }, [customerData?.data]);
+
+  const handleSelectChange = useCallback(
+    (
+      field: string,
+      value: any,
+      additionalUpdates: Record<string, any> = {}
+    ) => {
+      const update: Record<string, any> = { [field]: value };
+      Object.entries(additionalUpdates).forEach(([key, val]) => {
+        update[key] = val;
+      });
+      setSelectedCustomer((prev) => ({
+        ...prev,
+        ...update,
+      }));
+    },
+    []
+  );
 
   useEffect(() => {
     setMounted(true);
@@ -302,12 +359,29 @@ const LaundryCheckout = () => {
                 <CardTitle>Konsumen</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-3 p-3 border border-dashed rounded-lg text-gray-500 cursor-pointer hover:border-gray-400">
-                  <User className="w-5 h-5" />
-                  <div>
-                    <div className="font-medium">Pilih Konsumen</div>
-                    <div className="text-sm">Klik untuk memilih.</div>
-                  </div>
+                <div>
+                  <SelectComboboxFilter
+                    data={customerOptions}
+                    searchTerm="Cari konsumen..."
+                    label=""
+                    placeholder="Pilih Konsumen"
+                    value={selectedCustomer?.id?.toString() || ""}
+                    onValueChange={(val) => {
+                      const customerId = Number(val) || 0;
+                      const selected = customerData?.data?.find(
+                        (c: Customer) => c.id === customerId
+                      );
+                      handleSelectChange("id", customerId, {
+                        name: selected?.name || "",
+                        phone: selected?.phone_number || "",
+                      });
+                    }}
+                    labelMax={30}
+                    disabled={isLoading}
+                    isRequired
+                    width={700}
+                    height={300}
+                  />
                 </div>
               </CardContent>
             </Card>

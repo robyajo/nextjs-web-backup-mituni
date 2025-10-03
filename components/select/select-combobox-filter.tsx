@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { ChevronsUpDown, Check } from "lucide-react";
+import { ChevronsUpDown, Check, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +25,7 @@ interface SelectOption {
   label: string;
   value: string;
   no_wa?: string;
+  phone?: string;
 }
 
 interface SelectProps {
@@ -291,24 +292,6 @@ const SelectComboboxFilter = React.forwardRef<HTMLButtonElement, SelectProps>(
       }
     }, [open]);
 
-    // Performance monitoring (development only)
-    // React.useEffect(() => {
-    //   if (process.env.NODE_ENV === "development") {
-    //     console.log(`SelectComboboxFilter Performance Stats:
-    //       - Total items: ${data.length}
-    //       - Filtered items: ${filteredItems.length}
-    //       - Visible items: ${virtualScroll.visibleItems.length}
-    //       - Search query: "${debouncedSearchQuery}"
-    //     `);
-    //   }
-    // }, [
-    //   data.length,
-    //   filteredItems.length,
-    //   virtualScroll.visibleItems.length,
-    //   debouncedSearchQuery,
-    // ]);
-
-    // console.log("virtualScroll", virtualScroll);
     return (
       <div className={cn("w-full space-y-1", className)}>
         {label && (
@@ -327,8 +310,8 @@ const SelectComboboxFilter = React.forwardRef<HTMLButtonElement, SelectProps>(
             <button
               ref={ref}
               className={cn(
-                "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-                "w-full justify-between",
+                "flex items-center w-full gap-3 p-3 border border-dashed rounded-lg text-gray-500 cursor-pointer hover:border-gray-400",
+                "text-left transition-colors",
                 errorText && "border-red-500",
                 disabled && "opacity-50 cursor-not-allowed"
               )}
@@ -337,17 +320,15 @@ const SelectComboboxFilter = React.forwardRef<HTMLButtonElement, SelectProps>(
               disabled={disabled || isLoading}
               type="button"
             >
-              <span className="truncate text-left">
-                {renderSelectedLabel()}
-              </span>
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              <User className="w-5 h-5 flex-shrink-0" />
+              <span className="truncate flex-1">{renderSelectedLabel()}</span>
             </button>
           </DialogTrigger>
 
           <DialogContent
             className={cn(
               "p-0 flex flex-col overflow-hidden",
-              "w-[95vh] sm:w-[95vh]",
+
               "max-w-[95vw] sm:max-w-[500px]",
               "h-[85vh] sm:h-auto",
               "max-h-[58vh] sm:max-h-[80vh]",
@@ -358,7 +339,7 @@ const SelectComboboxFilter = React.forwardRef<HTMLButtonElement, SelectProps>(
           >
             <DialogTitle className="sr-only">Pilih {searchTerm}</DialogTitle>
 
-            <Command className="flex flex-col h-full" shouldFilter={false}>
+            <Command className="" shouldFilter={false}>
               {/* Search Input */}
               <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                 <CommandInput
@@ -379,19 +360,6 @@ const SelectComboboxFilter = React.forwardRef<HTMLButtonElement, SelectProps>(
 
               {/* Virtual Scrolled List */}
               <div className="flex-1 relative">
-                {/* Clear selection button */}
-                {/* {value && !debouncedSearchQuery && (
-                  <div className="border-b px-3 py-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-full justify-start text-sm text-muted-foreground hover:text-foreground"
-                      onClick={handleClearSelection}
-                    >
-                      <span className="truncate">Lihat Semua</span>
-                    </Button>
-                  </div>
-                )} */}
                 {isLoading ? (
                   <div className="py-8 text-center text-sm text-muted-foreground px-4">
                     <span className="animate-spin mr-2 inline-block h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
@@ -409,14 +377,14 @@ const SelectComboboxFilter = React.forwardRef<HTMLButtonElement, SelectProps>(
                   </CommandEmpty>
                 ) : (
                   <CommandList
-                    ref={virtualScroll.scrollElementRef}
-                    className="overflow-y-auto h-full"
-                    onScroll={virtualScroll.handleScroll}
+                    className="overflow-y-auto"
                     style={{ maxHeight: containerHeight }}
                   >
-                    <CommandGroup className="p-0">
-                      {/* Virtual scrolling container */}
+                    <CommandEmpty>No results found.</CommandEmpty>
+                    <CommandGroup heading="Available options">
                       <div
+                        ref={virtualScroll.scrollElementRef}
+                        onScroll={virtualScroll.handleScroll}
                         style={{
                           height: virtualScroll.totalHeight,
                           position: "relative",
@@ -435,34 +403,27 @@ const SelectComboboxFilter = React.forwardRef<HTMLButtonElement, SelectProps>(
                             return (
                               <CommandItem
                                 key={`${item.value}-${actualIndex}`}
-                                value={item.label}
+                                value={item.value}
                                 onSelect={() => handleSelect(item.value)}
                                 className={cn(
-                                  "cursor-pointer relative flex items-center transition-colors",
-                                  "px-3 sm:px-4 py-2.5 sm:py-3",
-                                  "text-sm sm:text-base",
-                                  "hover:bg-accent focus:bg-accent",
-                                  "border-b border-border/20 last:border-b-0",
+                                  "relative flex items-center px-2 py-1.5 text-sm rounded-md",
+                                  "cursor-default select-none",
+                                  "hover:bg-accent hover:text-accent-foreground",
                                   value === item.value && "bg-accent/50"
                                 )}
                                 style={{ height: ITEM_HEIGHT }}
                               >
                                 <div className="flex-1 min-w-0 flex items-center gap-2">
                                   <div className="truncate">{item.label}</div>
-                                  {item.no_wa && (
-                                    <>
-                                      <span className="text-muted-foreground">
-                                        •
-                                      </span>
-                                      <div className="text-xs text-muted-foreground truncate">
-                                        {item.no_wa}
-                                      </div>
-                                    </>
+                                  {item.phone && (
+                                    <span className="text-xs text-muted-foreground truncate">
+                                      {item.phone}
+                                    </span>
                                   )}
                                 </div>
                                 <Check
                                   className={cn(
-                                    "shrink-0 transition-opacity ml-2 h-4 w-4",
+                                    "ml-2 h-4 w-4",
                                     value === item.value
                                       ? "opacity-100"
                                       : "opacity-0"
